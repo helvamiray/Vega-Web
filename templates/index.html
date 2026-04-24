@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vega Mühendislik - Endüstriyel Çözümler</title>
+    <style>
+        /* Alt menülerin açılmasını sağlayan kritik kod */
+        .cat-item.active > .sub-menu {
+            display: block !important;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f4f7f9; 
+            color: #333; 
+            margin: 0; 
+            padding: 0; 
+            scroll-behavior: smooth;
+        }
+
+        /* Navigasyon */
+        .navbar {
+            background: white;
+            padding: 15px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+        .navbar-logo {
+            font-weight: bold;
+            font-size: 1.6em;
+            color: #003366;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+        .navbar-links a {
+            text-decoration: none;
+            color: #444;
+            font-weight: 600;
+            margin-left: 30px;
+            font-size: 0.9em;
+            transition: 0.3s;
+        }
+        .navbar-links a:hover { color: #00d4ff; }
+
+        /* Sayfa Düzeni */
+        .main-container {
+            display: flex;
+            max-width: 1400px;
+            margin: 30px auto;
+            gap: 25px;
+            padding: 0 20px;
+        }
+
+        /* Sidebar Filtre Menüsü */
+        .sidebar {
+            width: 300px;
+            flex-shrink: 0;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .filter-group { margin-bottom: 25px; }
+        .filter-title { font-weight: bold; color: #003366; border-bottom: 2px solid #00d4ff; padding-bottom: 8px; margin-bottom: 15px; }
+        
+        .category-list { list-style: none; padding: 0; }
+        .cat-item { margin-bottom: 5px; }
+        .cat-toggle {
+            width: 100%; text-align: left; background: none; border: none; padding: 8px;
+            cursor: pointer; font-size: 0.9em; color: #444; font-weight: 600;
+            display: flex; justify-content: space-between; transition: 0.3s;
+        }
+        .cat-toggle:hover { color: #00d4ff; background: #f0faff; }
+        .sub-menu { list-style: none; padding-left: 15px; display: none; margin-top: 5px; border-left: 1px solid #ddd; }
+        .cat-item.active > .sub-menu { display: block; }
+        .sub-menu li { padding: 5px 0; font-size: 0.85em; color: #666; cursor: pointer; }
+        .sub-menu li:hover { color: #00d4ff; }
+
+        /* Başlıklar */
+        .section-title { text-align: center; color: #003366; margin-bottom: 50px; margin-top: 50px; }
+        .blue-line { height: 4px; width: 70px; background: #00d4ff; margin: -40px auto 40px auto; border-radius: 2px; }
+
+        /* Ürün Listesi */
+        .content-area { flex: 1; }
+        .urun-listesi { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 20px; 
+        }
+        .urun-karti { 
+            background: white; border-radius: 15px; overflow: hidden; border: 1px solid #eee; 
+            transition: 0.4s; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            animation: fadeInUp 1s ease-out;
+        }
+        .urun-karti:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.15); border-color: #00d4ff; }
+        .urun-resmi { width: 100%; height: 200px; object-fit: cover; border-bottom: 3px solid #003366; }
+
+        .katalog-link {
+            text-decoration: none; background: white; padding: 15px; border-radius: 12px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 10px;
+            border-left: 5px solid #00d4ff; color: #003366; font-weight: bold; font-size: 0.85em;
+        }
+
+        /* Modal Stili */
+        #teklif-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; width: 90%; max-width: 450px; padding: 30px; border-radius: 20px; position: relative;
+        }
+        .modal-content input, .modal-content textarea {
+            width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;
+        }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="navbar-logo">VEGA <span style="color: #00d4ff;">ENERJİ</span></a>
+        <div class="navbar-links">
+            <a href="#hakkimizda">KURUMSAL</a>
+            <a href="#hizmetler">HİZMETLER</a>
+            <a href="#urunler">ÜRÜNLER</a>
+            <a href="#kataloglar">KATALOGLAR</a>
+            <a href="#iletisim">İLETİŞİM</a>
+        </div>
+    </nav>
+
+    <div style="height: 60vh; background: linear-gradient(rgba(0,51,102,0.8), rgba(0,51,102,0.8)), url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1350&q=80'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; text-align: center; color: white;">
+        <div>
+            <h1 style="font-size: 4em; margin: 0; letter-spacing: 12px; text-transform: uppercase;">VEGA</h1>
+            <p style="font-size: 1.4em; letter-spacing: 4px; color: #00d4ff;">MÜHENDİSLİK & ENERJİ SİSTEMLERİ</p>
+        </div>
+    </div>
+
+    <div style="background: #003366; color: white; padding: 50px 0; display: flex; justify-content: space-around; text-align: center; flex-wrap: wrap;">
+        <div><div style="font-size: 2.5em; font-weight: bold; color: #00d4ff;">15+</div><div style="font-size: 0.8em; color: #ccc;">YILLIK TECRÜBE</div></div>
+        <div><div style="font-size: 2.5em; font-weight: bold; color: #00d4ff;">450+</div><div style="font-size: 0.8em; color: #ccc;">TAMAMLANAN PROJE</div></div>
+        <div><div style="font-size: 2.5em; font-weight: bold; color: #00d4ff;">100%</div><div style="font-size: 0.8em; color: #ccc;">MÜŞTERİ MEMNUNİYETİ</div></div>
+    </div>
+
+    <div id="hizmetler" style="padding: 80px 20px; max-width: 1200px; margin: auto; text-align: center;">
+        <h2 class="section-title">Hizmet Alanlarımız</h2>
+        <div class="blue-line"></div>
+        <div style="display: flex; gap: 25px; flex-wrap: wrap; justify-content: center;">
+            <div style="flex: 1; min-width: 300px; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+                <div style="font-size: 40px; margin-bottom: 15px;">⚙️</div>
+                <h3 style="color: #003366;">Otomasyon</h3>
+                <p style="color: #666; font-size: 0.9em; line-height: 1.6;">Endüstriyel PLC ve SCADA yazılımları ile üretim hatlarınızı modernize ediyoruz.</p>
+            </div>
+            <div style="flex: 1; min-width: 300px; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+                <div style="font-size: 40px; margin-bottom: 15px;">⚡</div>
+                <h3 style="color: #003366;">Enerji</h3>
+                <p style="color: #666; font-size: 0.9em; line-height: 1.6;">Yüksek gerilim, trafo merkezi kurulumu ve enerji kalitesi yönetimi sağlıyoruz.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="hakkimizda" style="background: white; padding: 80px 20px; border-top: 1px solid #eee;">
+        <div style="max-width: 1200px; margin: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 60px;">
+            <div style="flex: 1; min-width: 300px;">
+                <h4 style="color: #00d4ff; letter-spacing: 2px;">KURUMSAL GÜÇ</h4>
+                <h2 style="color: #003366; font-size: 2.4em;">Vega Enerji İle Geleceği Tasarlayın</h2>
+                <p style="color: #666; line-height: 1.8;">Sektördeki 15 yıllık birikimimizle, mühendislik disiplininden taviz vermeden teknolojik çözümler üretiyoruz. EFA Mekanik Mühendislik iş birliği ile yanınızdayız.</p>
+            </div>
+            <div style="flex: 1; min-width: 300px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="background: #f8f9fa; padding: 25px; border-left: 4px solid #003366;">
+                    <h5 style="margin: 0; color: #003366;">UZMAN KADRO</h5>
+                    <p style="font-size: 0.8em; margin: 5px 0 0; color: #888;">Deneyimli Mühendisler</p>
+                </div>
+                <div style="background: #f8f9fa; padding: 25px; border-left: 4px solid #003366;">
+                    <h5 style="margin: 0; color: #003366;">KALİTE STANDARTLARI</h5>
+                    <p style="font-size: 0.8em; margin: 5px 0 0; color: #888;">ISO 9001 Belgeli</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="urunler" style="padding-top: 50px; background: #f4f7f9;">
+        <h2 class="section-title">Ürün Katalogumuz</h2>
+        <div style="max-width: 600px; margin: 0 auto 40px auto; padding: 0 20px; position: relative;">
+            <input type="text" id="urunAra" onkeyup="urunFiltrele()" placeholder="Ürün ismi veya özellik ara..." 
+            style="width: 100%; padding: 15px 50px; border-radius: 50px; border: 2px solid #00d4ff; outline: none; box-shadow: 0 5px 15px rgba(0,0,0,0.05); box-sizing: border-box;">
+            <span style="position: absolute; left: 35px; top: 15px; font-size: 20px;">🔍</span>
+        </div>
+        <div class="blue-line"></div>
+    </div>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="filter-group">
+                <div class="filter-title">MARKALAR</div>
+                <div style="font-size: 0.9em;">
+                    <label style="display: block; margin-bottom: 5px;"><input type="checkbox" class="brand-check" value="Kodsan" onchange="urunFiltrele()"> Kodsan</label>
+                    <label style="display: block; margin-bottom: 5px;"><input type="checkbox" class="brand-check" value="ECA" onchange="urunFiltrele()"> E.C.A</label>
+                    <label style="display: block; margin-bottom: 5px;"><input type="checkbox" class="brand-check" value="Duca" onchange="urunFiltrele()"> Duca</label>
+                    <label style="display: block; margin-bottom: 5px;"><input type="checkbox" class="brand-check" value="Ecodense" onchange="urunFiltrele()"> Ecodense</label>
+                    <label style="display: block; margin-bottom: 5px;"><input type="checkbox" class="brand-check" value="Wilo" onchange="urunFiltrele()"> Wilo</label>
+                    <label style="display: block; margin-bottom: 5px;"><input type="checkbox" class="brand-check" value="Daikin" onchange="urunFiltrele()"> Daikin</label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <div class="filter-title">ÜRÜN GRUPLARI</div>
+                <ul class="category-list">
+                    <li class="cat-item">
+                        <button class="cat-toggle" onclick="toggleMenu(this)">Klima <span>+</span></button>
+                        <ul class="sub-menu">
+                            <li onclick="filterByCat('Bireysel')">Bireysel</li>
+                            <li class="cat-item">
+                                <button class="cat-toggle" onclick="toggleMenu(this)">Merkezi Klima <span>+</span></button>
+                                <ul class="sub-menu">
+                                    <li onclick="filterByCat('VRF')">VRF Sistemler</li>
+                                    <li onclick="filterByCat('VRV')">VRV Sistemler</li>
+                                    <li class="cat-item">
+                                        <button class="cat-toggle" onclick="toggleMenu(this)">Multi <span>+</span></button>
+                                        <ul class="sub-menu">
+                                            <li onclick="filterByCat('Dış Ünite')">Dış Ünite</li>
+                                            <li onclick="filterByCat('Duvar Tipi')">Duvar Tipi</li>
+                                            <li onclick="filterByCat('Kaset Tipi')">Kaset Tipi</li>
+                                            <li onclick="filterByCat('Tavan Tipi')">Tavan Tipi</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="cat-item">
+                                <button class="cat-toggle" onclick="toggleMenu(this)">Ticari <span>+</span></button>
+                                <ul class="sub-menu">
+                                    <li onclick="filterByCat('Duvar Tipi')">Duvar Tipi</li>
+                                    <li onclick="filterByCat('Kanal Tipi')">Kanal Tipi</li>
+                                    <li onclick="filterByCat('Salon Tipi')">Salon Tipi</li>
+                                </ul>
+                            </li>
+                            <li class="cat-item">
+                                <button class="cat-toggle" onclick="toggleMenu(this)">Fancoil <span>+</span></button>
+                                <ul class="sub-menu">
+                                    <li onclick="filterByCat('Termostat')">Dijital/Mekanik Termostat</li>
+                                    <li onclick="filterByCat('Dört Borulu')">Dört Borulu Fancoil</li>
+                                    <li onclick="filterByCat('İki Borulu')">İki Borulu Fancoil</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="cat-item">
+                        <button class="cat-toggle" onclick="toggleMenu(this)">Isı Pompası & Kazan <span>+</span></button>
+                        <ul class="sub-menu">
+                            <li onclick="filterByCat('Monoblok')">Monoblok Isı Pompası</li>
+                            <li onclick="filterByCat('Split')">Split Isı Pompası</li>
+                            <li onclick="filterByCat('Kazan')">Duvar / Yer Tipi Kazan</li>
+                        </ul>
+                    </li>
+
+                    <li class="cat-item">
+                        <button class="cat-toggle" onclick="toggleMenu(this)">Boyler & Tank <span>+</span></button>
+                        <ul class="sub-menu">
+                            <li onclick="filterByCat('Akümülasyon')">Akümülasyon Tankı</li>
+                            <li onclick="filterByCat('Buffer')">Buffer Tankı</li>
+                            <li onclick="filterByCat('Boyler')">Tek / Çift Serpantili Boyler</li>
+                            <li onclick="filterByCat('Genleşme')">Genleşme Tankı</li>
+                        </ul>
+                    </li>
+
+                    <li class="cat-item">
+                        <button class="cat-toggle" onclick="toggleMenu(this)">Pompa & Hidrofor <span>+</span></button>
+                        <ul class="sub-menu">
+                            <li class="cat-item">
+                                <button class="cat-toggle" onclick="toggleMenu(this)">Atık Su & Drenaj <span>+</span></button>
+                                <ul class="sub-menu">
+                                    <li onclick="filterByCat('Bıçaklı')">Bıçaklı Foseptik Pompası</li>
+                                    <li onclick="filterByCat('Kirli Su')">Kirli Su Drenaj Pompası</li>
+                                </ul>
+                            </li>
+                            <li class="cat-item">
+                                <button class="cat-toggle" onclick="toggleMenu(this)">Hidrofor <span>+</span></button>
+                                <ul class="sub-menu">
+                                    <li onclick="filterByCat('Düşey Milli')">Düşey Milli Hidroforlar</li>
+                                    <li onclick="filterByCat('Frekans Kontrollü')">Frekans Kontrollü Hidrofor</li>
+                                    <li onclick="filterByCat('Paslanmaz')">Paslanmaz Hidroforlar</li>
+                                </ul>
+                            </li>
+                            <li class="cat-item">
+                                <button class="cat-toggle" onclick="toggleMenu(this)">Sirkülasyon <span>+</span></button>
+                                <ul class="sub-menu">
+                                    <li onclick="filterByCat('Islak Rotorlu')">Islak Rotorlu Pompalar</li>
+                                    <li onclick="filterByCat('Kuru Rotorlu')">Kuru Rotorlu Pompalar</li>
+                                </ul>
+                            </li>
+                            <li onclick="filterByCat('Yangın')">Yangın Hidroforu (Dizel/Elek.)</li>
+                        </ul>
+                    </li>
+
+                    <li class="cat-item">
+                        <button class="cat-toggle" onclick="toggleMenu(this)">Yerden Isıtma <span>+</span></button>
+                        <ul class="sub-menu">
+                            <li onclick="filterByCat('Boru')">PER-T / PEX-A Boru</li>
+                            <li onclick="filterByCat('Kollektör')">Kollektör & Aksesuar</li>
+                            <li onclick="filterByCat('Strafor')">Yerden Isıtma Straforu</li>
+                        </ul>
+                    </li>
+
+                    <li class="cat-item">
+                        <button class="cat-toggle" onclick="toggleMenu(this)">Mekanik Tesisat <span>+</span></button>
+                        <ul class="sub-menu">
+                            <li onclick="filterByCat('Boru')">Çelik / Galvaniz / Siyah Boru</li>
+                            <li onclick="filterByCat('Çekvalf')">Çalpara / Disk / Yaylı Çekvalf</li>
+                            <li onclick="filterByCat('Fleks')">Doğalgaz / Su / Fancoil Fleks</li>
+                            <li onclick="filterByCat('Vana')">Kelebek / Küresel / Sürgülü Vana</li>
+                            <li onclick="filterByCat('Separatör')">Hava Ayırıcı / Denge Kabı</li>
+                        </ul>
+                    </li>
+
+                </ul>
+            </div>
+        </aside>
+        <main class="content-area">
+            <div class="urun-listesi" id="urunGrid">
+                {% for urun in urunler %}
+                <div class="urun-karti" data-marka="{{ urun.marka }}" data-kategori="{{ urun.kategori }}">
+                    {% if urun.resim_yolu %}
+                        <img src="{{ urun.resim_yolu }}" alt="{{ urun.ad }}" class="urun-resmi">
+                    {% endif %}
+                    <div style="padding: 15px;">
+                        <span style="font-size: 0.7em; color: #00d4ff; font-weight: bold; text-transform: uppercase;">{{ urun.marka }}</span>
+                        <div style="color: #003366; font-size: 1em; font-weight: bold; margin: 5px 0;">{{ urun.ad }}</div>
+                        <p style="color: #666; font-size: 0.85em; height: 40px; overflow: hidden;">{{ urun.aciklama }}</p>
+                        <button onclick="sepeteEkle('{{ urun.ad }}')" style="width: 100%; background: #003366; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px;">➕ Listeye Ekle</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+
+    <div id="teklif-modal">
+        <div class="modal-content">
+            <span onclick="sepetiKapat()" style="position: absolute; top: 15px; right: 20px; font-size: 25px; cursor: pointer;">&times;</span>
+            <h3 style="color: #003366; margin-top: 0;">Teklif Talep Formu</h3>
+            <p style="font-size: 0.9em; color: #666;">Seçilen Ürün Sayısı: <span id="modal-adet" style="font-weight: bold; color: #00d4ff;">0</span></p>
+            <form id="teklif-formu">
+                <input type="text" placeholder="Firma Adı*" required>
+                <input type="text" placeholder="Ad Soyad*" required>
+                <input type="tel" placeholder="Telefon*" required>
+                <input type="email" placeholder="E-posta*" required>
+                <textarea placeholder="Eklemek istediğiniz not..." rows="3"></textarea>
+                <button type="submit" style="width: 100%; background: #003366; color: white; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">📩 Teklifi Gönder</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="kataloglar" style="padding: 80px 20px; background: #f0f4f8;">
+        <h2 class="section-title">Teknik Kataloglar</h2>
+        <div class="blue-line"></div>
+        <div style="max-width: 1200px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
+            <a href="/static/kataloglar/2803DaikinKombi_Premix_VZ.pdf" target="_blank" class="katalog-link"><span>📄</span> Daikin Premix VZ</a>
+            <a href="/static/kataloglar/etna_genel_satis_katalogu_tr12_1.pdf" target="_blank" class="katalog-link"><span>📄</span> Etna Genel Satış</a>
+            <a href="/static/kataloglar/2803Daikin_NDJ_Premix.pdf" target="_blank" class="katalog-link"><span>📄</span> York VRF Sistemleri</a>
+            <a href="/static/kataloglar/lowara_Urun_Portfoyu_Brosur_15web.pdf" target="_blank" class="katalog-link"><span>📄</span> Lowara ürün </a>
+            <a href="/static/kataloglar/ecodense-yogusmali-kazan-katalogu.pdf" target="_blank" class="katalog-link"><span>📄</span> Ecodense</a>
+            <a href="/static/kataloglar/2803Daikin_NDJ_Premix.pdf" target="_blank" class="katalog-link"><span>📄</span> Daikin NDJ</a>
+            <a href="/static/kataloglar/FRAeNKISCHE_TI-profitherm_07-2020_LQ.pdf" target="_blank" class="katalog-link"><span>📄</span> FRAeNKISCHE</a>
+            <a href="/static/kataloglar/YORK_VRF_KATALOG.pdf" target="_blank" class="katalog-link"><span>📄</span> York VRF Sistemleri</a>
+        </div>
+    </div>
+
+    <div id="iletisim" style="background: white; padding: 80px 20px; border-top: 1px solid #eee;">
+        <div style="max-width: 1200px; margin: auto; display: flex; flex-wrap: wrap; gap: 50px;">
+            <div style="flex: 1; min-width: 300px;">
+                <h4 style="color: #00d4ff; letter-spacing: 2px;">BİZE ULAŞIN</h4>
+                <h2 style="color: #003366; font-size: 2.2em;">Merkez Ofisimiz</h2>
+                <p style="color: #666;">İkitelli OSB, Eskoop Sanayi Sitesi, Başakşehir / İSTANBUL</p>
+                <p style="color: #666;"><strong>Tel:</strong> +90 (212) 000 00 00</p>
+                <a href="https://maps.app.goo.gl/YpSumAjy3k2yWT17A" target="_blank" style="display: inline-block; background: #003366; color: white; padding: 12px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; margin-top: 10px;">🚗 Yol Tarifi Al</a>
+            </div>
+            <div style="flex: 1; min-width: 300px; height: 300px; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+<div style="flex: 1; min-width: 300px; height: 300px; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+    <iframe 
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3261.278385750431!2d33.41443917637841!3d35.21510345579979!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14de108757273763%3A0xc621b44ec67f70b7!2sUluslararas%C4%B1%20K%C4%B1br%C4%B1s%20%C3%9Cniversitesi!5e0!3m2!1str!2s!4v1711234567890!5m2!1str!2s" 
+        width="100%" 
+        height="100%" 
+        style="border:0;" 
+        allowfullscreen="" 
+        loading="lazy" 
+        referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
+</div>            </div>
+        </div>
+    </div>
+
+    <footer style="background: #003366; color: white; padding: 50px 20px; text-align: center;">
+        <h2 style="margin: 0; letter-spacing: 4px;">VEGA ENERJİ</h2>
+        <div style="margin: 20px 0;">
+            <a href="https://www.linkedin.com/company/efamuhendislik/?originalSubdomain=tr" target="_blank" style="color: white; margin: 0 10px; background: #0077b5; padding: 8px 15px; border-radius: 5px; text-decoration: none;">🔗 LinkedIn</a>
+            <a href="https://www.instagram.com/efamekanik/" target="_blank" style="color: white; margin: 0 10px; background: #e1306c; padding: 8px 15px; border-radius: 5px; text-decoration: none;">📸 Instagram</a>
+        </div>
+        <p style="font-size: 0.8em; color: #888;">© 2026 Vega Enerji | Yazılım: Miray Helva | <a href="/admin" style="color: #666;">Admin</a></p>
+    </footer>
+
+    <div id="sepet-butonu" onclick="sepetiAc()" style="position: fixed; bottom: 30px; right: 30px; background: #00d4ff; color: white; padding: 15px 25px; border-radius: 50px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 9999; display: none;">
+        🛒 Teklif Listesi (<span id="sepet-sayisi">0</span>)
+    </div>
+
+    <script>
+        let sepet = [];
+
+        function sepeteEkle(urunAdi) {
+            sepet.push(urunAdi);
+            document.getElementById('sepet-sayisi').innerText = sepet.length;
+            const sepetBtn = document.getElementById('sepet-butonu');
+            sepetBtn.style.display = 'flex';
+            sepetBtn.style.transform = 'scale(1.2)';
+            setTimeout(() => sepetBtn.style.transform = 'scale(1)', 200);
+        }
+
+        function sepetiAc() {
+            const modal = document.getElementById('teklif-modal');
+            const modalAdet = document.getElementById('modal-adet');
+            if (sepet.length > 0) {
+                modal.style.display = 'flex';
+                if(modalAdet) modalAdet.innerText = sepet.length;
+            } else {
+                alert("Lütfen önce listeden ürün seçiniz.");
+            }
+        }
+
+        function sepetiKapat() {
+            document.getElementById('teklif-modal').style.display = 'none';
+        }
+
+        document.getElementById('teklif-formu').onsubmit = function(e) {
+            e.preventDefault();
+            const veriler = {
+                firma: this.elements[0].value,
+                isim: this.elements[1].value,
+                tel: this.elements[2].value,
+                email: this.elements[3].value,
+                not: this.elements[4].value,
+                urunler: sepet
+            };
+
+            fetch('/teklif-gonder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(veriler)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === "success") {
+                    alert("✅ Teklif isteğiniz başarıyla iletildi!");
+                    sepet = [];
+                    document.getElementById('sepet-sayisi').innerText = "0";
+                    sepetiKapat();
+                    document.getElementById('sepet-butonu').style.display = 'none';
+                    this.reset();
+                } else {
+                    alert("❌ Hata: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+                alert("⚠️ Bir bağlantı hatası oluştu.");
+            });
+        };
+
+        function toggleMenu(btn) {
+            let item = btn.parentElement;
+            item.classList.toggle('active');
+            let span = btn.querySelector('span');
+            if (span) {
+                span.innerText = item.classList.contains('active') ? '-' : '+';
+            }
+        }
+
+        function urunFiltrele() {
+            let search = document.getElementById('urunAra').value.toLowerCase();
+            let brands = Array.from(document.querySelectorAll('.brand-check:checked')).map(cb => cb.value);
+            let cards = document.getElementsByClassName('urun-karti');
+            for (let card of cards) {
+                let name = card.innerText.toLowerCase();
+                let brand = card.getAttribute('data-marka');
+                let matchSearch = name.includes(search);
+                let matchBrand = brands.length === 0 || brands.includes(brand);
+                card.style.display = (matchSearch && matchBrand) ? "" : "none";
+            }
+        }
+
+        function filterByCat(cat) { 
+            document.getElementById('urunAra').value = cat; 
+            urunFiltrele(); 
+        }
+    </script>
+</body>
+</html>
